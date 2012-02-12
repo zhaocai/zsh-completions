@@ -5,8 +5,7 @@
 #
 #  Completion script for curl
 #
-#  Source: https://github.com/Valodim/zsh-curl-completion commit b02fe87c06
-#
+#  Source: https://github.com/Valodim/zsh-curl-completion commit 08c7bb6cf2
 #
 # ------------------------------------------------------------------------------
 # Authors
@@ -19,14 +18,12 @@
 # vim: ft=zsh sw=2 ts=2 et
 # ------------------------------------------------------------------------------
 
+# based on curl 7.24.0
+
 local curcontext="$curcontext" state line
 typeset -A opt_args
 
-_curl_crypto_engine() {
-    local vals
-    vals=( ${${(f)"$(curl --engine list)":gs/ /}[2,$]} )
-    _describe -t outputs 'engines' vals && return 0
-}
+local arg_http arg_ftp arg_other arg_proxy arg_crypto arg_connection arg_auth arg_input arg_output
 
 # HTTP Arguments
 arg_http=(''\
@@ -72,7 +69,7 @@ arg_ftp=(\
   '--ftp-ssl-control[require SSL/TLS for FTP login, clear for transfer]' \
   {-l,--list-only}'[list names only when listing directories (FTP)]' \
   {-P,--ftp-port}'[use active mode, tell server to connect to specified address or interface (FTP]:address' \
-  '*'{-Q,--quote}'[send arbitray command to the remote server before transfer (FTP/SFTP)]:command' \
+  '*'{-Q,--quote}'[send arbitrary command to the remote server before transfer (FTP/SFTP)]:command' \
   )
 
 # Other Protocol arguments
@@ -108,7 +105,7 @@ arg_crypto=(\
   '--crlfile[specify file with revoked certificates]:file' \
   '--delegation[set delegation policy to use with GSS/kerberos]:delegation policy:(none policy always)' \
   {-E,--cert}'[use specified client certificate]:certificate file:_files' \
-  '--engine[use selected OpenSSL crypto engine]:ssl crypto engine:{_curl_crypto_engine}' \
+  '--engine[use selected OpenSSL crypto engine]:ssl crypto engine:{print ${${(f)"$(curl --engine list)"}[2,$]}}' \
   '--egd-file[set ssl entropy gathering daemon socket]:entropy socket:_files' \
   '--cert-type[specify certificate type (PEM, DER, ENG)]:certificate type:(PEM DER ENG)' \
   '--cacert[specify certificate file to verify the peer with]:CA certificate:_files' \
@@ -152,13 +149,13 @@ arg_connection=(\
   {-Y,--speed-limit}'[specify minimum speed for --speed-time]:speed' \
   )
 
-# Authentication arugments
+# Authentication arguments
 arg_auth=(\
   '--anyauth[use any authentication method, default to most secure]' \
   '--basic[use HTTP Basic authentication]' \
   '--ntlm[enable ntlm authentication]' \
   '--digest[use http digest authentication]' \
-  '--krb[use kerberos authentication]:auth:(clear safe confidental private)' \
+  '--krb[use kerberos authentication]:auth:(clear safe confidential private)' \
   '--negotiate[enable GSS-Negotiate authentication]' \
   {-n,--netrc}'[scan ~/.netrc for login data]' \
   '--netrc-optional[like --netrc, but does not make .netrc usage mandatory]' \
@@ -183,7 +180,7 @@ arg_input=(\
 
 # Output arguments
 arg_output=(\
-  '--create-dirs[create local directory hierachy as needed]' \
+  '--create-dirs[create local directory hierarchy as needed]' \
   {-D,--dump-header}'[write protocol headers to file]:dump file:_files' \
   {-o,--output}'[write to specified file instead of stdout]:output file:_files' \
   {--progress-bar,-\#}'[display progress as a simple progress bar]' \
